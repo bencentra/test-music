@@ -35,11 +35,13 @@ float[] beats = {1, 0.5, 0.25, 0.125};
 int phase = 1;
 int PHASES_PER_SONG = 4;
 int measure = 1;
-int MEASURES_PER_PHASE = 4; //8
+int MEASURES_PER_PHASE = 8; //8
 int beat = 0;
 int BEATS_PER_MEASURE = 4;
 int mils = millis();
 int lastMils = mils;
+int delay = mils;
+int DELAY_THRESHOLD = 15;
 
 // Music Stuff
 int[] scale = {0, 2, 4, 7, 9}; // I, II, III, V, VI of a major scale
@@ -120,6 +122,7 @@ void draw() {
 	// Debug
 	text("Focus/Relax: "+focusRelaxLevel, 0, HEIGHT - 15, WIDTH, HEIGHT);
 	text("Pulse: "+pulse, WIDTH/4, HEIGHT - 15, WIDTH, HEIGHT);
+	text("Dummy: "+useDummyData, WIDTH/2, HEIGHT - 15, WIDTH, HEIGHT);
 	text("Beat: "+beat, 0, HEIGHT/2, WIDTH, HEIGHT);
 	text("Measure: "+measure, 0, HEIGHT/2 + 15, WIDTH, HEIGHT);
 	text("Phase: "+phase, 0, HEIGHT/2 + 30, WIDTH, HEIGHT);
@@ -214,7 +217,9 @@ void playMusic() {
 	// Get current time
 	mils = millis();
 	// Beat Change
-	if (mils > lastMils + beatsToMils(1)) {
+	if (mils > lastMils + beatsToMils(1) - delay) {
+		int milsA = millis();
+		println("\tA: "+milsA);
 		updateLevelHistory();
 		updateBpmHistory();
 		if (beat == BEATS_PER_MEASURE) {
@@ -256,6 +261,11 @@ void playMusic() {
 		}
 		// Update the time
 		lastMils = millis();
+		int milsB = millis();
+		println("\tB: "+milsB);
+		delay += milsB - milsA;
+		println("DELAY: "+delay);
+		if (delay > DELAY_THRESHOLD) delay = 0;
 	}
 }
 
@@ -559,7 +569,7 @@ void createPadMeasure() {
 int beatsToMils(float beats){
   // (one second split into single beats) * # needed
   float convertedNumber = (60000 / bpm) * beats;
-  return (int) convertedNumber;
+  return round(convertedNumber);
 }
 
 // Adjust the Focus and Relax values
