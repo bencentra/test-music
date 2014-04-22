@@ -19,6 +19,7 @@ IntList levelHist = new IntList();
 int MAX_FOCUS = 100;
 int MAX_RELAX = -100;
 int level = 0;
+int LEVEL_STEP = 4;
 
 // BPM - Beats per minute, tempo, corresponds to pulse (average over X measures)
 int pulse = 80; // 65
@@ -69,7 +70,7 @@ RiriSequence arp; // Arpeggiator, Relax
 RiriSequence pad; // Pad, Relax 
 
 // MindFlex Serial things
-int MINDFLEX_PORT = 0;
+int MINDFLEX_PORT = 5;
 Serial mindFlex;
 PrintWriter output;
 int packetCount = 0;
@@ -219,7 +220,7 @@ void playMusic() {
 	// Beat Change
 	if (mils > lastMils + beatsToMils(1) - delay) {
 		int milsA = millis();
-		println("\tA: "+milsA);
+		//println("\tA: "+milsA);
 		updateLevelHistory();
 		updateBpmHistory();
 		if (beat == BEATS_PER_MEASURE) {
@@ -262,9 +263,9 @@ void playMusic() {
 		// Update the time
 		lastMils = millis();
 		int milsB = millis();
-		println("\tB: "+milsB);
+		//println("\tB: "+milsB);
 		delay += milsB - milsA;
-		println("DELAY: "+delay);
+		//println("DELAY: "+delay);
 		if (delay > DELAY_THRESHOLD) delay = 0;
 	}
 }
@@ -512,8 +513,8 @@ void createPadMeasure() {
 			int p1 = pitch - 12;
 			int p2 = pitch + scale[(int) random(1, scale.length)] - 12;
 			RiriChord c1 = new RiriChord(channel6);
-			c1.addNote(p1, 80, beatsToMils(beats[0]*4));
-			c1.addNote(p2, 80, beatsToMils(beats[0]*4));
+			c1.addNote(p1, 80, beatsToMils(beats[0]*BEATS_PER_MEASURE));
+			c1.addNote(p2, 80, beatsToMils(beats[0]*BEATS_PER_MEASURE));
 			pad.addChord(c1);
 		}
 		// Pad - Grain 2
@@ -521,12 +522,12 @@ void createPadMeasure() {
 			int p1 = pitch - 12;
 			int p2 = pitch + scale[(int) random(1, scale.length)] - 12;
 			RiriChord c1 = new RiriChord(channel6);
-			c1.addNote(p1, 80, beatsToMils(beats[1]*4));
-			c1.addNote(p2, 80, beatsToMils(beats[1]*4));
+			c1.addNote(p1, 80, beatsToMils(beats[1]*BEATS_PER_MEASURE));
+			c1.addNote(p2, 80, beatsToMils(beats[1]*BEATS_PER_MEASURE));
 			p2 = pitch + scale[(int) random(1, scale.length)] - 12;
 			RiriChord c2 = new RiriChord(channel6);
-			c2.addNote(p1, 80, beatsToMils(beats[1]*4));
-			c2.addNote(p2, 80, beatsToMils(beats[1]*4));
+			c2.addNote(p1, 80, beatsToMils(beats[1]*BEATS_PER_MEASURE));
+			c2.addNote(p2, 80, beatsToMils(beats[1]*BEATS_PER_MEASURE));
 			pad.addChord(c1);
 			pad.addChord(c2);
 		}
@@ -535,20 +536,20 @@ void createPadMeasure() {
 			int p1 = pitch - 12;
 			int p2 = pitch + scale[(int) random(1, scale.length)] - 12;
 			RiriChord c1 = new RiriChord(channel6);
-			c1.addNote(p1, 80, beatsToMils(beats[2]*4));
-			c1.addNote(p2, 80, beatsToMils(beats[2]*4));
+			c1.addNote(p1, 80, beatsToMils(beats[2]*BEATS_PER_MEASURE));
+			c1.addNote(p2, 80, beatsToMils(beats[2]*BEATS_PER_MEASURE));
 			p2 = pitch + scale[(int) random(1, scale.length)] - 12;
 			RiriChord c2 = new RiriChord(channel6);
-			c2.addNote(p1, 80, beatsToMils(beats[2]*4));
-			c2.addNote(p2, 80, beatsToMils(beats[2]*4));
+			c2.addNote(p1, 80, beatsToMils(beats[2]*BEATS_PER_MEASURE));
+			c2.addNote(p2, 80, beatsToMils(beats[2]*BEATS_PER_MEASURE));
 			p2 = pitch + scale[(int) random(1, scale.length)] - 12;
 			RiriChord c3 = new RiriChord(channel6);
-			c3.addNote(p1, 80, beatsToMils(beats[2]*4));
-			c3.addNote(p2, 80, beatsToMils(beats[2]*4));
+			c3.addNote(p1, 80, beatsToMils(beats[2]*BEATS_PER_MEASURE));
+			c3.addNote(p2, 80, beatsToMils(beats[2]*BEATS_PER_MEASURE));
 			p2 = pitch + scale[(int) random(1, scale.length)] - 12;
 			RiriChord c4 = new RiriChord(channel6);
-			c4.addNote(p1, 80, beatsToMils(beats[2]*4));
-			c4.addNote(p2, 80, beatsToMils(beats[2]*4));
+			c4.addNote(p1, 80, beatsToMils(beats[2]*BEATS_PER_MEASURE));
+			c4.addNote(p2, 80, beatsToMils(beats[2]*BEATS_PER_MEASURE));
 			pad.addChord(c1);
 			pad.addChord(c2);
 			pad.addChord(c3);
@@ -696,8 +697,8 @@ void serialEvent(Serial p) {
 	String input;
 	try {
 		input = p.readString().trim();
-		print("Received string over serial: ");
-		println(input);
+		//print("Received string over serial: ");
+		//println(input);
 		output.println(input);
 	}
 	catch (Exception e) {
@@ -711,11 +712,11 @@ void calculateFocusRelaxLevel(String input) {
 	// Parse the data
 	boolean goodRead = false;
 	if (input.indexOf("ERROR:") != -1 || input.length() == 0) {
-		println("bad");
+		//println("bad");
 		goodRead = false;
 	}
 	else {
-		println("good");
+		//println("good");
 		goodRead = true;
 	}
 	if (goodRead) {
@@ -750,7 +751,7 @@ void calculateFocusRelaxLevel(String input) {
 				min = intData[i];
 			}
 		}
-		println("MIN " + min + " MAX " + max);
+		//println("MIN " + min + " MAX " + max);
 
 		int[] tmp = new int[intData.length - 3];
 		for (int i = 3; i < intData.length; i++) {
@@ -773,11 +774,22 @@ void calculateFocusRelaxLevel(String input) {
 		focusVal = (int) (focusVal / 4);
 		relaxVal = (int) (relaxVal / 4);
 
+
 		// Set the brain level
 		newLevel = focusVal - relaxVal;
+		// METHOD 1: Set focusRelaxLevel to the difference of focus and relax
 		// focusRelaxLevel = (int) newLevel;
+		// METHOD 2: Adjust focusRelaxLevel based on a fraction of the difference of focus and relax
 		//focusRelaxLevel += (int) (newLevel / 4);
-		focusRelaxLevel += (int) newLevel;
+		//focusRelaxLevel += (int) newLevel;
+		// METHOD 3: Adjust focusRelaxLevel based on "direction" of mental activity
+		// and adjust by the current grain
+		if (newLevel >= 1) {
+			focusRelaxLevel += (focusRelaxLevel >= 0) ? (LEVEL_STEP - grain) : LEVEL_STEP;
+		}
+		else if (newLevel <= -1) {
+			focusRelaxLevel -= (focusRelaxLevel < 0) ? (LEVEL_STEP - grain) : LEVEL_STEP;
+		}
 		if (focusRelaxLevel > MAX_FOCUS) {
 			focusRelaxLevel = MAX_FOCUS;
 		}
@@ -785,7 +797,8 @@ void calculateFocusRelaxLevel(String input) {
 			focusRelaxLevel = MAX_RELAX;
 		}
 		//newLevel = map(focusVal - relaxVal, 0, 100, -100, 100);
-		println("NEW LEVEL: "+newLevel);
+		//println("NEW LEVEL: "+newLevel);
+		println("FOCUS: "+focusVal+", RELAX: "+relaxVal+", NEW LEVEL: "+newLevel);
 	}
 	else {
 		// Do something
